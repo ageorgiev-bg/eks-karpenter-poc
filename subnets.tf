@@ -52,7 +52,7 @@ resource "aws_subnet" "public_zone2" {
   }
 }
 
-# ROUTES
+# Routes
 
 resource "aws_route_table" "private" {
   vpc_id = aws_vpc.main.id
