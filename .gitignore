@@ -1,0 +1,5 @@
+.terraform.*
+.terraform/**
+.K8s**
+.other-EKS-features/**
+terraform.plan
