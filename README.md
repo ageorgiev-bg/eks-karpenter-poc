@@ -1,8 +1,8 @@
 # AWS EKS Karpenter POC
 
 This project consits of several components
-- Karpenter configuration
-- Kubernetes Ingress controller component 
+- Karpenter autoscaler configuration
+- Kubernetes external ingress controller component 
 
 
 <!-- BEGIN_TF_DOCS -->
