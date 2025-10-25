@@ -1,6 +1,8 @@
 # AWS EKS Karpenter POC
 
-This project consits of several components
+This project contains several components
+- VPC configuration
+- EKS cluster
 - Karpenter autoscaler configuration
 - Kubernetes external ingress controller component 
 
