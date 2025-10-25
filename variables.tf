@@ -41,7 +41,7 @@ locals {
 
   aws_auth_roles = [
     {
-      rolearn  = "${aws_iam_role.karpenter_nodes.arn}"
+      rolearn  = aws_iam_role.karpenter_nodes.arn
       username = "system:node:{{EC2PrivateDNSName}}"
       groups   = ["system:bootstrappers", "system:nodes"]
     },
@@ -57,16 +57,8 @@ locals {
 
 variable "eks_security_group_id" {
   description = "ID of an existing security group to attach to the node groups created"
-  type        = string
-  default     = ""
+  type        = list(string)
 }
-
-variable "cluster_security_group_tags" {
-  description = "A map of additional tags to add to the cluster security group created"
-  type        = map(string)
-  default     = {}
-}
-
 
 variable "region" {
   type        = string

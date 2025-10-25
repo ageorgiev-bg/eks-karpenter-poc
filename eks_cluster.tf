@@ -112,7 +112,7 @@ resource "aws_security_group_rule" "ingress_eks_cluster" {
   # ipv6_cidr_blocks         = lookup(each.value, "ipv6_cidr_blocks", null)
   # prefix_list_ids          = lookup(each.value, "prefix_list_ids", null)
   # self                     = lookup(each.value, "self", null)
-  source_security_group_id = try(each.value.source_node_security_group, false) ? aws_eks_cluster.eks_clu.vpc_config[0].cluster_security_group_id : lookup(var.eks_security_group_id, null)
+  source_security_group_id = try(each.value.source_node_security_group, false) ? aws_eks_cluster.eks_clu.vpc_config[0].cluster_security_group_id : element(var.eks_security_group_id, 0)
 }
 
 resource "aws_vpc_security_group_ingress_rule" "karpenter_nodes" {

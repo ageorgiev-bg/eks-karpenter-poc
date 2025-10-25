@@ -9,7 +9,7 @@ resource "helm_release" "external_nginx" {
 
   values = [file("${path.module}/values/ext-nginx-ing.yaml")]
 
-  depends_on = [aws_eks_cluster.eks_clu, helm_release.aws_lbc]
+  depends_on = [aws_eks_cluster.eks_clu]
 }
 
 resource "null_resource" "remove_dangling_sgs" {
