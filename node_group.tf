@@ -5,7 +5,7 @@ resource "aws_eks_node_group" "eks_clu" {
   node_role_arn   = aws_iam_role.karpenter_nodes.arn
   subnet_ids      = [aws_subnet.private_zone1.id, aws_subnet.private_zone2.id]
   capacity_type   = "ON_DEMAND"
-  ami_type        = "AL2023_x86_64_STANDARD"
+  ami_type        = "AL2023_ARM_64_STANDARD"
   instance_types  = var.instance_types
   scaling_config {
     desired_size = 1

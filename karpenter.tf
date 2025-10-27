@@ -398,7 +398,7 @@ metadata:
 spec:
   role: "${aws_iam_role.karpenter_nodes.name}"
   amiSelectorTerms: 
-  - alias: al2@v20250212 # must change for regions that are not us-east-1
+  - alias: bottlerocket@latest # must change for regions that are not us-east-1
   securityGroupSelectorTerms:
   - tags:
       karpenter.sh/discovery: ${var.cluster_name}
