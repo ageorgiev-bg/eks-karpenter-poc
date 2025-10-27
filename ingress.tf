@@ -31,7 +31,7 @@ resource "null_resource" "remove_dangling_sgs" {
           done
     DOC
   }
-  depends_on = [helm_release.external_nginx, aws_eks_cluster.eks_clu]
+  depends_on = [helm_release.external_nginx]
 }
 
 

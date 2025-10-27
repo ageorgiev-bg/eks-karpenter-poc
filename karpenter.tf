@@ -42,7 +42,7 @@ resource "aws_eks_pod_identity_association" "karpenter" {
   role_arn        = aws_iam_role.karpenter_controller.arn
 }
 
-# Manifests
+# Karpenter Manifests
 
 resource "kubernetes_manifest" "karpenter_default_ec2_node_class" {
   count           = 0
