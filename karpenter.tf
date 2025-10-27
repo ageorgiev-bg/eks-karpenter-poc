@@ -3,17 +3,12 @@ resource "helm_release" "karpenter" {
 
   repository       = "oci://public.ecr.aws/karpenter"
   chart            = "karpenter"
-  version          = "1.2.1"
+  version          = "1.8.1"
   namespace        = "karpenter"
   create_namespace = true
   force_update     = true
   lint             = true
   wait             = true
-
-  # set {
-  #   name  = "settings.interruptionQueue"
-  #   value = var.cluster_name
-  # }
 
   set = [
     {
@@ -21,11 +16,11 @@ resource "helm_release" "karpenter" {
       value = var.cluster_name
       }, {
       name  = "controller.resources.requests.cpu"
-      value = 1
+      value = 0.5
       }, {
 
       name  = "controller.resources.requests.memory"
-      value = "1Gi"
+      value = "512Mi"
       }, {
 
       name  = "controller.resources.limits.cpu"
@@ -37,7 +32,7 @@ resource "helm_release" "karpenter" {
     }
   ]
 
-  depends_on = [aws_eks_cluster.eks_clu, helm_release.metrics_server]
+  depends_on = [aws_eks_cluster.eks_clu] # , helm_release.metrics_server
 }
 
 resource "aws_eks_pod_identity_association" "karpenter" {
@@ -46,6 +41,92 @@ resource "aws_eks_pod_identity_association" "karpenter" {
   service_account = "karpenter"
   role_arn        = aws_iam_role.karpenter_controller.arn
 }
+
+# Manifests
+
+resource "kubernetes_manifest" "karpenter_default_ec2_node_class" {
+  count           = 0
+  computed_fields = ["spec.requirements"]
+  manifest = yamldecode(<<YAML
+apiVersion: karpenter.k8s.aws/v1
+kind: EC2NodeClass
+metadata:
+  name: default
+spec:
+  role: "${aws_iam_role.karpenter_nodes.name}"
+  amiSelectorTerms: 
+  - alias: bottlerocket@latest # must change for regions that are not us-east-1
+  securityGroupSelectorTerms:
+  - tags:
+      karpenter.sh/discovery: ${var.cluster_name}
+  subnetSelectorTerms:
+  - tags:
+      karpenter.sh/discovery: ${var.cluster_name}
+  tags:
+    IntentLabel: apps
+    KarpenterNodePoolName: default
+    # NodeType: default
+    intent: apps
+    karpenter.sh/discovery: ${var.cluster_name}
+YAML
+  )
+  depends_on = [
+    aws_eks_cluster.eks_clu,
+    helm_release.karpenter
+  ]
+}
+
+resource "kubernetes_manifest" "karpenter_default_node_pool" {
+  count = 0
+  manifest = yamldecode(<<YAML
+apiVersion: karpenter.sh/v1
+kind: NodePool
+metadata:
+  name: default 
+spec: 
+  template:
+    metadata:
+      name: default
+      labels:
+        intent: apps
+    spec:
+      requirements:
+        - key: kubernetes.io/arch
+          operator: In
+          values: ["amd64"]
+        - key: "karpenter.k8s.aws/instance-cpu"
+          operator: In
+          values: ["2","4", "8", "16", "32", "48", "64"]
+        - key: "karpenter.k8s.aws/instance-memory"
+          operator: Gt
+          values: ["2000"]
+        - key: karpenter.sh/capacity-type
+          operator: In
+          values: ["on-demand"]
+        - key: karpenter.k8s.aws/instance-category
+          operator: In
+          values: ["c", "m", "r", "t"]
+      nodeClassRef:
+        name: default
+        group: karpenter.k8s.aws
+        kind: EC2NodeClass
+  limits:
+    cpu: 1000
+    memory: 1000Gi 
+  disruption:
+    consolidationPolicy: WhenEmpty #OrUnderutilized
+    consolidateAfter: 3m
+    expireAfter: Never
+YAML
+  )
+  depends_on = [
+    aws_eks_cluster.eks_clu,
+    helm_release.karpenter,
+    kubernetes_manifest.karpenter_default_ec2_node_class,
+  ]
+}
+
+
 
 ################
 
@@ -122,9 +203,9 @@ resource "aws_iam_policy" "karpenter_controller" {
   description = "Karpenter Controller Policy"
 
   policy = <<EOT
-{
-    "Version": "2012-10-17",
-    "Statement": [
+  {
+      "Version": "2012-10-17",
+      "Statement": [
         {
             "Sid": "AllowScopedEC2InstanceAccessActions",
             "Effect": "Allow",
@@ -314,7 +395,8 @@ resource "aws_iam_policy" "karpenter_controller" {
             "Effect": "Allow",
             "Resource": "arn:aws:iam::${local.account_id}:instance-profile/*",
             "Action": [
-                "iam:CreateInstanceProfile"
+                "iam:CreateInstanceProfile",
+                "iam:ListInstanceProfiles"
             ],
             "Condition": {
                 "StringEquals": {
@@ -332,7 +414,8 @@ resource "aws_iam_policy" "karpenter_controller" {
             "Effect": "Allow",
             "Resource": "arn:aws:iam::${local.account_id}:instance-profile/*",
             "Action": [
-                "iam:TagInstanceProfile"
+                "iam:TagInstanceProfile",
+                "iam:ListInstanceProfiles"
             ],
             "Condition": {
                 "StringEquals": {
@@ -355,7 +438,8 @@ resource "aws_iam_policy" "karpenter_controller" {
             "Action": [
                 "iam:AddRoleToInstanceProfile",
                 "iam:RemoveRoleFromInstanceProfile",
-                "iam:DeleteInstanceProfile"
+                "iam:DeleteInstanceProfile",
+                "iam:ListInstanceProfiles"
             ],
             "Condition": {
                 "StringEquals": {
@@ -371,7 +455,10 @@ resource "aws_iam_policy" "karpenter_controller" {
             "Sid": "AllowInstanceProfileReadActions",
             "Effect": "Allow",
             "Resource": "arn:aws:iam::${local.account_id}:instance-profile/*",
-            "Action": "iam:GetInstanceProfile"
+            "Action": [
+                "iam:GetInstanceProfile", 
+                "iam:ListInstanceProfiles"
+            ]
         },
         {
             "Sid": "AllowAPIServerEndpointDiscovery",
@@ -379,93 +466,7 @@ resource "aws_iam_policy" "karpenter_controller" {
             "Resource": "arn:aws:eks:${var.region}:${local.account_id}:cluster/${var.cluster_name}",
             "Action": "eks:DescribeCluster"
         }
-    ]
-}
-EOT
-}
-
-
-# Manifests
-
-resource "kubernetes_manifest" "karpenter_default_ec2_node_class" {
-  count           = 0
-  computed_fields = ["spec.requirements"]
-  manifest = yamldecode(<<YAML
-apiVersion: karpenter.k8s.aws/v1
-kind: EC2NodeClass
-metadata:
-  name: default
-spec:
-  role: "${aws_iam_role.karpenter_nodes.name}"
-  amiSelectorTerms: 
-  - alias: bottlerocket@latest # must change for regions that are not us-east-1
-  securityGroupSelectorTerms:
-  - tags:
-      karpenter.sh/discovery: ${var.cluster_name}
-  subnetSelectorTerms:
-  - tags:
-      karpenter.sh/discovery: ${var.cluster_name}
-  tags:
-    IntentLabel: apps
-    KarpenterNodePoolName: default
-    # NodeType: default
-    intent: apps
-    karpenter.sh/discovery: ${var.cluster_name}
-    project: karpenter-blueprints
-YAML
-  )
-  depends_on = [
-    aws_eks_cluster.eks_clu,
-    helm_release.karpenter
-  ]
-}
-
-resource "kubernetes_manifest" "karpenter_default_node_pool" {
-  count = 0
-  manifest = yamldecode(<<YAML
-apiVersion: karpenter.sh/v1
-kind: NodePool
-metadata:
-  name: default 
-spec: 
-  template:
-    metadata:
-      name: default
-      labels:
-        intent: apps
-    spec:
-      requirements:
-        - key: kubernetes.io/arch
-          operator: In
-          values: ["amd64"]
-        - key: "karpenter.k8s.aws/instance-cpu"
-          operator: In
-          values: ["2","4", "8", "16", "32", "48", "64"]
-        - key: "karpenter.k8s.aws/instance-memory"
-          operator: Gt
-          values: ["2000"]
-        - key: karpenter.sh/capacity-type
-          operator: In
-          values: ["on-demand"]
-        - key: karpenter.k8s.aws/instance-category
-          operator: In
-          values: ["c", "m", "r", "t"]
-      nodeClassRef:
-        name: default
-        group: karpenter.k8s.aws
-        kind: EC2NodeClass
-  limits:
-    cpu: 1000
-    memory: 1000Gi 
-  disruption:
-    consolidationPolicy: WhenEmpty #OrUnderutilized
-    consolidateAfter: 3m
-    expireAfter: Never
-YAML
-  )
-  depends_on = [
-    aws_eks_cluster.eks_clu,
-    helm_release.karpenter,
-    kubernetes_manifest.karpenter_default_ec2_node_class,
-  ]
+      ]
+  }
+  EOT
 }

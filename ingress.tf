@@ -3,13 +3,20 @@ resource "helm_release" "external_nginx" {
 
   repository       = "https://kubernetes.github.io/ingress-nginx"
   chart            = "ingress-nginx"
-  namespace        = "ingress"
+  namespace        = "ingress-nginx"
   create_namespace = true
-  version          = "4.11.1"
+  version          = "4.13.3"
 
   values = [file("${path.module}/values/ext-nginx-ing.yaml")]
 
-  depends_on = [aws_eks_cluster.eks_clu]
+  # set {
+  #   name  = "controller.service.annotations.service\\.beta\\.kubernetes\\.io/aws-load-balancer-ssl-cert"
+  #   value = module.acm_backend.acm_certificate_arn
+  #   type  = "string"
+  # }
+
+
+  depends_on = [aws_eks_cluster.eks_clu, helm_release.aws_lbc]
 }
 
 resource "null_resource" "remove_dangling_sgs" {

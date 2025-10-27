@@ -62,22 +62,6 @@ resource "aws_iam_role_policy_attachment" "AmazonEKSVPCResourceController" {
 
 ## Security group
 
-resource "aws_security_group_rule" "ingress_karpenter_nodes" {
-  for_each = { for k, v in merge(
-    local.cluster_security_group_rules
-  ) : k => v if local.create_node_sg }
-
-  # Required
-  security_group_id = aws_eks_cluster.eks_clu.vpc_config[0].cluster_security_group_id
-  protocol          = each.value.protocol
-  from_port         = lookup(each.value, "from_port", null)
-  to_port           = lookup(each.value, "to_port", null)
-  type              = each.value.type
-
-  source_security_group_id = aws_security_group.karpenter_nodes.id
-}
-
-
 resource "aws_security_group" "karpenter_nodes" {
 
   name        = "${var.cluster_name}-karpenter-nodes"
@@ -94,9 +78,24 @@ resource "aws_security_group" "karpenter_nodes" {
   }
 }
 
+resource "aws_security_group_rule" "ingress_karpenter_nodes" {
+  for_each = { for k, v in merge(
+    local.karpenter_nodes_security_group_ingress_rules
+  ) : k => v if local.create_node_sg }
+
+  # Required
+  security_group_id = aws_eks_cluster.eks_clu.vpc_config[0].cluster_security_group_id
+  protocol          = each.value.protocol
+  from_port         = lookup(each.value, "from_port", null)
+  to_port           = lookup(each.value, "to_port", null)
+  type              = each.value.type
+
+  source_security_group_id = aws_security_group.karpenter_nodes.id
+}
+
 resource "aws_security_group_rule" "ingress_eks_cluster" {
   for_each = { for k, v in merge(
-    local.cluster_security_group_rules
+    local.cluster_security_group_ingress_rules
   ) : k => v if local.create_node_sg }
 
   # Required
@@ -112,12 +111,12 @@ resource "aws_security_group_rule" "ingress_eks_cluster" {
   # ipv6_cidr_blocks         = lookup(each.value, "ipv6_cidr_blocks", null)
   # prefix_list_ids          = lookup(each.value, "prefix_list_ids", null)
   # self                     = lookup(each.value, "self", null)
-  source_security_group_id = try(each.value.source_node_security_group, false) ? aws_eks_cluster.eks_clu.vpc_config[0].cluster_security_group_id : element(var.eks_security_group_id, 0)
+  source_security_group_id = try(tostring(var.eks_clu_security_group_id), false) ? element(var.eks_clu_security_group_id, 0) : aws_eks_cluster.eks_clu.vpc_config[0].cluster_security_group_id # source_security_group_id = aws_eks_cluster.eks_clu.vpc_config[0].cluster_security_group_id 
 }
 
-resource "aws_vpc_security_group_ingress_rule" "karpenter_nodes" {
+resource "aws_vpc_security_group_ingress_rule" "karpenter_nodes_ingress" {
   for_each = { for k, v in merge(
-    local.cluster_security_group_rules
+    local.karpenter_nodes_security_group_ingress_rules
   ) : k => v if local.create_node_sg }
 
   # Required
@@ -136,7 +135,7 @@ resource "aws_vpc_security_group_ingress_rule" "karpenter_nodes" {
 
 resource "aws_vpc_security_group_egress_rule" "karpenter_nodes_egress" {
   for_each = { for k, v in merge(
-    local.cluster_security_group_rules
+    local.karpenter_nodes_security_group_egress_rules
   ) : k => v if local.create_node_sg }
 
   # Required
@@ -150,7 +149,7 @@ resource "aws_vpc_security_group_egress_rule" "karpenter_nodes_egress" {
   cidr_ipv4   = lookup(each.value, "cidr_blocks", null)
   # ipv6_cidr_blocks             = lookup(each.value, "ipv6_cidr_blocks", null)
   # prefix_list_ids              = lookup(each.value, "prefix_list_ids", null)
-  # referenced_security_group_id = aws_security_group.karpenter_nodes.id
+  referenced_security_group_id = lookup(each.value, "referenced_security_group_id", null)
 }
 
 # Addons

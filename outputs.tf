@@ -9,3 +9,7 @@ output "endpoint" {
 output "kubeconfig-certificate-authority-data" {
   value = aws_eks_cluster.eks_clu.certificate_authority[0].data
 }
+
+output "local-acocunt" {
+  value = local.account_id
+}
