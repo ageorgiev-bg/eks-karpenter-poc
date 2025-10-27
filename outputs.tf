@@ -9,7 +9,7 @@ output "endpoint" {
 
 output "kubeconfig-certificate-authority-data" {
   value = aws_eks_cluster.eks_clu.certificate_authority[0].data
-  describetion = "Base64 encoded certificate data required to communicate with the cluster."
+  description = "Base64 encoded certificate data required to communicate with the cluster."
 }
 
 output "local-acocunt" {
