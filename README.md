@@ -123,7 +123,7 @@ No modules.
 
 | Name | Description |
 |------|-------------|
-| <a name="output_endpoint"></a> [endpoint](#output\_endpoint) | n/a |
-| <a name="output_kubeconfig-certificate-authority-data"></a> [kubeconfig-certificate-authority-data](#output\_kubeconfig-certificate-authority-data) | n/a |
-| <a name="output_local-acocunt"></a> [local-acocunt](#output\_local-acocunt) | n/a |
+| <a name="output_endpoint"></a> [endpoint](#output\_endpoint) | Endpoint for EKS control plane. |
+| <a name="output_kubeconfig-certificate-authority-data"></a> [kubeconfig-certificate-authority-data](#output\_kubeconfig-certificate-authority-data) | Base64 encoded certificate data required to communicate with the cluster. |
+| <a name="output_local-acocunt"></a> [local-acocunt](#output\_local-acocunt) | AWS account ID |
 <!-- END_TF_DOCS -->
