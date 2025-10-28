@@ -1,13 +1,16 @@
+<!-- BEGIN_TF_DOCS -->
 # AWS EKS Karpenter POC
 
 This project contains several components
 - VPC configuration
 - EKS cluster
 - Karpenter autoscaler configuration
-- Kubernetes external ingress controller component 
+- Kubernetes (external) NGINX ingress controller component configured with:
+ - IP mode
+ - using AWS Load Balancer Controller
+ - AWS Network Load Balancer
+ - serving HTTP requests # TODO: HTTPS
 
-
-<!-- BEGIN_TF_DOCS -->
 ## Requirements
 
 | Name | Version |
