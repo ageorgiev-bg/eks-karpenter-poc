@@ -8,11 +8,11 @@
 * - AWS EKS cluster
 * - Karpenter autoscaler configuration
 *   - karpenter node group in order to support it
-* - Kubernetes (external) NGINX ingress controller component configured with:
+* - Kubernetes (external) NGINX ingress controller component configuration:
 *   - IP mode
-*   - using AWS Load Balancer Controller
-*   - exposing AWS Network Load Balancer
-*   - serving HTTP requests  (TODO: HTTPS)
+*   - AWS Load Balancer Controller
+*   - exposes AWS Network Load Balancer
+*   - services HTTP requests  (TODO: HTTPS)
 */
 
 
