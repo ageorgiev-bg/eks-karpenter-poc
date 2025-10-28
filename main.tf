@@ -11,8 +11,8 @@
 * - Kubernetes (external) NGINX ingress controller component configured with:
 *   - IP mode
 *   - using AWS Load Balancer Controller
-*   - AWS Network Load Balancer
-*   - serving HTTP requests # TODO: HTTPS
+*   - exposing AWS Network Load Balancer
+*   - serving HTTP requests  (TODO: HTTPS)
 */
 
 
