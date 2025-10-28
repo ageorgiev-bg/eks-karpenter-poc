@@ -3,13 +3,17 @@
 
 This project contains several components
 - VPC configuration
-- EKS cluster
+  - EKS nodes in private subnets
+  - private subnets have egress access to the internet
+  - public subnets where the AWS Network Load Balancer is located
+- AWS EKS cluster
 - Karpenter autoscaler configuration
+  - karpenter node group in order to support it
 - Kubernetes (external) NGINX ingress controller component configured with:
- - IP mode
- - using AWS Load Balancer Controller
- - AWS Network Load Balancer
- - serving HTTP requests # TODO: HTTPS
+  - IP mode
+  - using AWS Load Balancer Controller
+  - AWS Network Load Balancer
+  - serving HTTP requests # TODO: HTTPS
 
 ## Requirements
 
