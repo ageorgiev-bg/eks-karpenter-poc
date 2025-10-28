@@ -43,9 +43,7 @@ resource "aws_eks_cluster" "eks_clu" {
 }
 
 ### IAM role for EKS Cluster
-## IAM Resources
 
-### EKS CLUSTER role
 data "aws_iam_policy_document" "eks_clu" {
   statement {
     effect = "Allow"
@@ -79,7 +77,6 @@ resource "aws_iam_role_policy_attachment" "AmazonEKSVPCResourceController" {
 
 
 ## Security group
-
 resource "aws_security_group" "karpenter_nodes" {
 
   name        = "${var.cluster_name}-karpenter-nodes"
@@ -123,7 +120,7 @@ resource "aws_security_group_rule" "ingress_eks_cluster" {
   to_port           = lookup(each.value, "to_port", null)
   type              = each.value.type
 
-  # # Optional
+  # Optional
   description = lookup(each.value, "description", null)
   # cidr_blocks              = lookup(each.value, "cidr_blocks", null)
   # ipv6_cidr_blocks         = lookup(each.value, "ipv6_cidr_blocks", null)
@@ -170,7 +167,7 @@ resource "aws_vpc_security_group_egress_rule" "karpenter_nodes_egress" {
   referenced_security_group_id = lookup(each.value, "referenced_security_group_id", null)
 }
 
-# Addons
+# EKS Addons
 
 resource "aws_eks_addon" "kube-proxy" {
   cluster_name                = var.cluster_name
