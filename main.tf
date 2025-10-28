@@ -3,9 +3,8 @@
 *
 * This project contains several components
 * - VPC configuration
-*   - EKS nodes in private subnets
-*   - private subnets have egress access to the internet
-*   - public subnets where the AWS Network Load Balancer is located
+*   - EKS nodes in private subnets with egress access to the internet
+*   - AWS Network Load Balancer is located in public subnets
 * - AWS EKS cluster
 * - Karpenter autoscaler configuration
 *   - karpenter node group in order to support it
