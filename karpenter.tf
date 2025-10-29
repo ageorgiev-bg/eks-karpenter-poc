@@ -32,7 +32,7 @@ resource "helm_release" "karpenter" {
     }
   ]
 
-  depends_on = [aws_eks_node_group.eks_clu, helm_release.metrics_server]
+  depends_on = [aws_eks_node_group.eks_clu] #, helm_release.metrics_server]
 }
 
 resource "aws_eks_pod_identity_association" "karpenter" {
