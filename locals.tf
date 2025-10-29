@@ -63,6 +63,11 @@ locals {
       username = "system:node:{{EC2PrivateDNSName}}"
       groups   = ["system:bootstrappers", "system:nodes"]
     },
+    {
+      rolearn : "arn:aws:iam::${local.account_id}:role/github-oidc-role"
+      username : "github-actions-user"
+      groups : ["system:masters"]
+    }
   ]
 
   tags = { "karpenter.sh/nodepool" = "default",

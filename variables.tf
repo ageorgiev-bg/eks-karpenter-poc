@@ -22,3 +22,9 @@ variable "instance_types" {
   type        = list(string)
   description = "Instance types"
 }
+
+variable "create_aws_auth_configmap" {
+  type        = bool
+  description = "Determines whether to create aws-auth configmap"
+  default     = false
+}
