@@ -7,7 +7,7 @@ This project contains several components
   - AWS Network Load Balancer is located in public subnets
 - AWS EKS cluster
 - Karpenter autoscaler configuration
-  - karpenter node group in order to support it
+  - managed node group to host karpenter scaler
 - Kubernetes (external) NGINX ingress controller component configured with:
   - IP mode
   - using AWS Load Balancer Controller
