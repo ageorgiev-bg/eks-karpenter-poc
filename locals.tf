@@ -46,8 +46,6 @@ locals {
     }
   }
 
-
-
   aws_auth_configmap_data = {
     mapRoles    = replace(yamlencode(local.aws_auth_roles), "/((?:^|\n)[\\s-]*)\"([\\w-]+)\":/", "$1$2:")
     mapUsers    = replace(yamlencode(local.aws_auth_users), "/((?:^|\n)[\\s-]*)\"([\\w-]+)\":/", "$1$2:")

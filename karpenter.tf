@@ -126,10 +126,6 @@ YAML
   ]
 }
 
-
-
-################
-
 ### EKS/Karpenter Worker node role
 
 data "aws_iam_policy_document" "karpenter_nodes" {
