@@ -7,18 +7,18 @@ This project contains several components
   - AWS Network Load Balancer is located in public subnets
 - AWS EKS cluster
 - Karpenter autoscaler configuration
-  - managed node group to host karpenter scaler
-- Kubernetes (external) NGINX ingress controller component configured with:
+  - karpenter node group in order to support it
+- Kubernetes (external) NGINX ingress controller component configuration:
   - IP mode
-  - using AWS Load Balancer Controller
-  - exposing AWS Network Load Balancer
-  - serving HTTP requests  (TODO: HTTPS)
+  - AWS Load Balancer Controller
+  - exposes AWS Network Load Balancer
+  - services HTTP requests  (TODO: HTTPS)
 
 ## Requirements
 
 | Name | Version |
 |------|---------|
-| <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | ~> 1.13.2 |
+| <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | ~> 1.11.2 |
 | <a name="requirement_aws"></a> [aws](#requirement\_aws) | ~> 6.18.0 |
 | <a name="requirement_helm"></a> [helm](#requirement\_helm) | ~> 3.0.2 |
 | <a name="requirement_kubernetes"></a> [kubernetes](#requirement\_kubernetes) | ~> 2.38.0 |
@@ -103,6 +103,7 @@ No modules.
 | [helm_release.external_nginx](https://registry.terraform.io/providers/hashicorp/helm/latest/docs/resources/release) | resource |
 | [helm_release.karpenter](https://registry.terraform.io/providers/hashicorp/helm/latest/docs/resources/release) | resource |
 | [helm_release.metrics_server](https://registry.terraform.io/providers/hashicorp/helm/latest/docs/resources/release) | resource |
+| [kubernetes_config_map.aws_auth](https://registry.terraform.io/providers/hashicorp/kubernetes/latest/docs/resources/config_map) | resource |
 | [kubernetes_config_map_v1_data.aws_auth](https://registry.terraform.io/providers/hashicorp/kubernetes/latest/docs/resources/config_map_v1_data) | resource |
 | [kubernetes_manifest.karpenter_default_ec2_node_class](https://registry.terraform.io/providers/hashicorp/kubernetes/latest/docs/resources/manifest) | resource |
 | [kubernetes_manifest.karpenter_default_node_pool](https://registry.terraform.io/providers/hashicorp/kubernetes/latest/docs/resources/manifest) | resource |
@@ -120,6 +121,7 @@ No modules.
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
 | <a name="input_cluster_name"></a> [cluster\_name](#input\_cluster\_name) | Cluster Name | `string` | n/a | yes |
+| <a name="input_create_aws_auth_configmap"></a> [create\_aws\_auth\_configmap](#input\_create\_aws\_auth\_configmap) | Determines whether to create aws-auth configmap | `bool` | `false` | no |
 | <a name="input_eks_clu_security_group_id"></a> [eks\_clu\_security\_group\_id](#input\_eks\_clu\_security\_group\_id) | ID of an existing security group to attach to the node groups created | `list(string)` | n/a | yes |
 | <a name="input_eks_ver"></a> [eks\_ver](#input\_eks\_ver) | Kubernetes version | `string` | n/a | yes |
 | <a name="input_instance_types"></a> [instance\_types](#input\_instance\_types) | Instance types | `list(string)` | n/a | yes |
