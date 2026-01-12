@@ -3,6 +3,8 @@ terraform {
     bucket = "tf-backend-347264769219"
     key    = "dev/terraform.tfstate"
     region = "eu-central-1"
+    encrypt = true
+    use_lockfile = true
   }
 }
 
